@@ -3,7 +3,6 @@ const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const config = require("./config");
 const socketIo = require("socket.io");
 const router = require("./router");
 const hostname = "127.0.0.1";
