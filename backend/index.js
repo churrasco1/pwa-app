@@ -7,35 +7,38 @@ const config = require("./config");
 const socketIo = require("socket.io");
 const router = require("./router");
 const hostname = "127.0.0.1";
-const port = 3000;
-const app = express();
 
-app.use(cors());
+const config = require("./config");
+const port = process.env.PORT || 3000;
+const hostman = ("RENDER" in process.env) ? "0.0.0.0" : "localhost";
 
-mongoose
-  .connect(config.db)
-  .then(() => console.log("Conection successful!"))
-  .catch((err) => console.error(err));
+mongoose.connect(process.env.MONGO_URI || config.db)
+.then(() => console.log('Conection successful'))
+.catch((err) => console.log(err));
 
-const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: "http://*:*", //allow all IPs and All ports
-  },
-});
+let router = require("./router");
 
-io.on("connection", (socket) => {
-  console.log("socket, new connection", socket.id);
+var app = express();
 
-  socket.on("disconnect", () => {
-    console.log("🔥 : A user disconnected");
-    socket.disconnect();
-  });
-});
+const customFrontendUrl = process.env.FRONTEND_URL || '';
 
-app.use(router.init(io));
-app.use("/images", express.static(path.join(__dirname, "images")));
+const allowedOrigins = [
+  customFrontendUrl,
+  'https://pwa-app.vercel.app',
+].filter(Boolean);
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-})
+const isAllowedOrigin = (origin) =>
+!origin || allowedOrigins.indexOf(origin);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (isAllowedOrigin(origin)) {
+    return callback(null, true);
+  }
+  return callback(new Error('Not allowed by CORS'));
+},
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
