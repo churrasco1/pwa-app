@@ -6,7 +6,7 @@ const scopes = require("../data/users/scopes");
 const VerifyToken = require("../middleware/token");
 const cookieParser = require("cookie-parser");
 
-const TicketsRouter = () => {
+const TicketsRouter = () => { 
   let router = express();
 
   router.use(bodyParser.json({ limit: "100mb" }));
